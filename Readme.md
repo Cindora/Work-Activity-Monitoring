@@ -2,11 +2,11 @@
 
 ## Features done:
 
-
-## Features in progress (and TODOs):
-
 - Client preparation
 - Server preparation
+- 
+## Features in progress (and TODOs):
+
 - Client-server messaging
 - Provide work with multiple clients
 - Client: Collect data (domain/machine/ip/user), last activity

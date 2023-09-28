@@ -71,15 +71,33 @@ int main()
 		return 1;
 	}
 
-	////   Client connected to the server   //
+	ClientSocket = accept(ListenSocket, NULL, NULL); // Connecting a client socket to the server
 
-	//result = shutdown(ConnectSocket, SD_SEND); // Shut down the socket to send
+	if (ClientSocket == INVALID_SOCKET) {
+		cout << "Accepting socket failed." << endl;
+		closesocket(ListenSocket);
+		freeaddrinfo(addrResult);
+		WSACleanup();
+		return 1;
+	}
 
-	//if (result == SOCKET_ERROR) {
-	//	closesocket(ConnectSocket);
-	//	freeaddrinfo(addrResult);
-	//	WSACleanup();
-	//	return 1;
-	//}
+	closesocket(ListenSocket);
+
+	//   Client connected to the server   //
+
+	result = shutdown(ClientSocket, SD_SEND); // Shut down the socket to send
+
+	if (result == SOCKET_ERROR) {
+		cout << "Shutdown client socket failed." << endl;
+		closesocket(ClientSocket);
+		freeaddrinfo(addrResult);
+		WSACleanup();
+		return 1;
+	}
+
+	closesocket(ClientSocket);
+	freeaddrinfo(addrResult);
+	WSACleanup();
+	return 0;
 
 }
