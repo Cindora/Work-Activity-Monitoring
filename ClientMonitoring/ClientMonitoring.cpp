@@ -65,7 +65,7 @@ int main()
 
 	const char* messageToSend = "Client to Server message.";
 
-	result = send(ConnectSocket, messageToSend, (int)strlen(messageToSend), 0);
+	result = send(ConnectSocket, messageToSend, (int)strlen(messageToSend), 0); // Sending message
 
 	if (result == SOCKET_ERROR) {
 		cout << "Message send failed. Result: " << result << endl;
@@ -94,7 +94,7 @@ int main()
 	ZeroMemory(buff, 256);
 
 	do {
-		result = recv(ConnectSocket, buff, 256, 0);
+		result = recv(ConnectSocket, buff, 256, 0); // Recieving message
 
 		if (result > 0) {
 			cout << "Recieved message: " << buff << endl;
@@ -105,7 +105,6 @@ int main()
 		else {
 			cout << "Recieving failed with error." << endl;
 		}
-
 	} while (result > 0);
 
 	//
