@@ -50,16 +50,26 @@ int main()
 	}
 
 
-	//result = connect(ConnectSocket, addrResult->ai_addr, (int)addrResult->ai_addrlen); // Connecting to the server
+	result = bind(ListenSocket, addrResult->ai_addr, (int)addrResult->ai_addrlen); // Bind the socket to our address
 
-	//if (result == SOCKET_ERROR) {
-	//	cout << "Connection to the server failed." << endl;
-	//	closesocket(ConnectSocket);
-	//	ConnectSocket = INVALID_SOCKET;
-	//	freeaddrinfo(addrResult);
-	//	WSACleanup();
-	//	return 1;
-	//}
+	if (result == SOCKET_ERROR) {
+		cout << "Binding server failed." << endl;
+		closesocket(ListenSocket);
+		ListenSocket = INVALID_SOCKET;
+		freeaddrinfo(addrResult);
+		WSACleanup();
+		return 1;
+	}
+
+	result = listen(ListenSocket, SOMAXCONN); // Set socket listening mode
+
+	if (result == SOCKET_ERROR) {
+		cout << "Listening socket failed." << endl;
+		closesocket(ListenSocket);
+		freeaddrinfo(addrResult);
+		WSACleanup();
+		return 1;
+	}
 
 	////   Client connected to the server   //
 
