@@ -13,10 +13,11 @@ int main()
 	WSADATA wsaData;
 	ADDRINFO hints;
 	ADDRINFO* addrResult = NULL;
+	SOCKET ConnectSocket = INVALID_SOCKET;
 
 	unsigned int result;
 
-	result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	result = WSAStartup(MAKEWORD(2, 2), &wsaData); // Initiate use of the Win socket 
 
 	if (result) {
 		cout << "WSA Startup failed. Result: " << result << endl;
@@ -29,12 +30,35 @@ int main()
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
-	result = getaddrinfo("localhost", "111", &hints, &addrResult);
-
+	result = getaddrinfo("localhost", "111", &hints, &addrResult); // Creating a path to the server
 	if (result) {
-		cout << "Getaddrinfo failed. Result: " << result << endl;
+		cout << "Path creation failed. Result: " << result << endl;
 		WSACleanup();
 		return 1;
 	}
+
+
+	ConnectSocket = socket(addrResult->ai_family, addrResult->ai_socktype, addrResult->ai_protocol); // Creating socket
+
+	if (ConnectSocket == INVALID_SOCKET) {
+		cout << "Socket creation failed." << endl;
+		freeaddrinfo(addrResult);
+		WSACleanup();
+		return 1;
+	}
+
+
+	result = connect(ConnectSocket, addrResult->ai_addr, (int)addrResult->ai_addrlen); // Connecting to the server
+
+	if (result == SOCKET_ERROR) {
+		cout << "Connection to the server failed." << endl;
+		closesocket(ConnectSocket);
+		ConnectSocket = INVALID_SOCKET;
+		freeaddrinfo(addrResult);
+		WSACleanup();
+		return 1;
+	}
+
+	//   Client connected to the server   //
 
 }
