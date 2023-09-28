@@ -61,4 +61,13 @@ int main()
 
 	//   Client connected to the server   //
 
+	result = shutdown(ConnectSocket, SD_SEND); // Shut down the socket to send
+
+	if (result == SOCKET_ERROR) {
+		closesocket(ConnectSocket);
+		freeaddrinfo(addrResult);
+		WSACleanup();
+		return 1;
+	}
+
 }
