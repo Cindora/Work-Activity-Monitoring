@@ -59,7 +59,24 @@ int main()
 		return 1;
 	}
 
-	//   Client connected to the server   //
+	///   Client connected to the server   ///
+
+	// Sending message
+
+	const char* messageToSend = "Client to Server message.";
+
+	result = send(ConnectSocket, messageToSend, (int)strlen(messageToSend), 0);
+
+	if (result == SOCKET_ERROR) {
+		cout << "Message send failed. Result: " << result << endl;
+		closesocket(ConnectSocket);
+		freeaddrinfo(addrResult);
+		WSACleanup();
+		return 1;
+	}
+
+	//
+
 
 	result = shutdown(ConnectSocket, SD_SEND); // Shut down the socket to send
 
@@ -70,4 +87,32 @@ int main()
 		return 1;
 	}
 
+
+	// Recieving message
+
+	char buff[256];
+	ZeroMemory(buff, 256);
+
+	do {
+		result = recv(ConnectSocket, buff, 256, 0);
+
+		if (result > 0) {
+			cout << "Recieved message: " << buff << endl;
+		}
+		else if (result == 0) {
+			cout << "Connection closed." << endl;
+		}
+		else {
+			cout << "Recieving failed with error." << endl;
+		}
+
+	} while (result > 0);
+
+	//
+
+
+	closesocket(ConnectSocket);
+	freeaddrinfo(addrResult);
+	WSACleanup();
+	return 0;
 }
