@@ -8,7 +8,21 @@
 
 using namespace std;
 
-int main()
+void Cleanup(SOCKET ConnectSocket, ADDRINFO* addrResult) {
+	if (ConnectSocket != INVALID_SOCKET) {
+		closesocket(ConnectSocket);
+		ConnectSocket = INVALID_SOCKET;
+	}
+		
+
+	if (addrResult != NULL) {
+		freeaddrinfo(addrResult);
+	}
+		
+	WSACleanup();
+}
+
+int ClientMonitoring()
 {
 	WSADATA wsaData;
 	ADDRINFO hints;
@@ -33,7 +47,7 @@ int main()
 	result = getaddrinfo("localhost", "111", &hints, &addrResult); // Creating a path to the server
 	if (result) {
 		cout << "Path creation failed. Result: " << result << endl;
-		WSACleanup();
+		Cleanup(ConnectSocket, addrResult);
 		return 1;
 	}
 
@@ -42,8 +56,7 @@ int main()
 
 	if (ConnectSocket == INVALID_SOCKET) {
 		cout << "Socket creation failed." << endl;
-		freeaddrinfo(addrResult);
-		WSACleanup();
+		Cleanup(ConnectSocket, addrResult);
 		return 1;
 	}
 
@@ -52,10 +65,7 @@ int main()
 
 	if (result == SOCKET_ERROR) {
 		cout << "Connection to the server failed." << endl;
-		closesocket(ConnectSocket);
-		ConnectSocket = INVALID_SOCKET;
-		freeaddrinfo(addrResult);
-		WSACleanup();
+		Cleanup(ConnectSocket, addrResult);
 		return 1;
 	}
 
@@ -69,9 +79,7 @@ int main()
 
 	if (result == SOCKET_ERROR) {
 		cout << "Message send failed. Result: " << result << endl;
-		closesocket(ConnectSocket);
-		freeaddrinfo(addrResult);
-		WSACleanup();
+		Cleanup(ConnectSocket, addrResult);
 		return 1;
 	}
 
@@ -81,9 +89,7 @@ int main()
 	result = shutdown(ConnectSocket, SD_SEND); // Shut down the socket to send
 
 	if (result == SOCKET_ERROR) {
-		closesocket(ConnectSocket);
-		freeaddrinfo(addrResult);
-		WSACleanup();
+		Cleanup(ConnectSocket, addrResult);
 		return 1;
 	}
 
@@ -110,8 +116,12 @@ int main()
 	//
 
 
-	closesocket(ConnectSocket);
-	freeaddrinfo(addrResult);
-	WSACleanup();
+	Cleanup(ConnectSocket, addrResult);
 	return 0;
+}
+
+int main()
+{
+	ClientMonitoring();
+	ClientMonitoring();
 }
