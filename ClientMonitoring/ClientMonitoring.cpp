@@ -68,7 +68,7 @@ int ClientMonitoring()
 
 	///   Client connected to the server   ///
 
-	const char* DataMessage = "domain machine ip user activity";
+	const char* DataMessage = "user machine domain ip activity";
 
 	result = send(ConnectSocket, DataMessage, (int)strlen(DataMessage), 0); // Send data to the server
 
@@ -115,6 +115,7 @@ int ClientMonitoring()
 
 int main()
 {
+	ClientMonitoring();
 	ClientMonitoring();
 
 	cin.get();

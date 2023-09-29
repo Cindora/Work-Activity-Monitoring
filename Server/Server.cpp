@@ -5,10 +5,26 @@
 #include <winSock2.h>
 #include <WS2tcpip.h>
 #include <string>
+#include <sstream>
+#include <fstream>
+
 
 using namespace std;
 
-void Cleanup(SOCKET ConnectSocket, ADDRINFO* addrResult) {
+struct Data {
+	string domain;
+	string machine;
+	string ip;
+	string user;
+	string activity;
+};
+
+void parseString(const char* input, Data& data) {
+	stringstream ss(input);
+	ss >> data.user >> data.machine >> data.domain >> data.ip >> data.activity;
+}
+
+void Cleanup(SOCKET ConnectSocket, ADDRINFO* addrResult) {	// Cleaning up the socket and address info
 	if (ConnectSocket != INVALID_SOCKET) {
 		closesocket(ConnectSocket);
 		ConnectSocket = INVALID_SOCKET;
@@ -18,6 +34,22 @@ void Cleanup(SOCKET ConnectSocket, ADDRINFO* addrResult) {
 	}
 	WSACleanup();
 }
+
+void SaveData(const Data& data) {	// Saving data to a file (Data/"user".data)
+	CreateDirectory("Data", NULL);
+	ofstream outputFile("Data/" + data.user + ".data");
+	if (outputFile.is_open()) { 
+		outputFile << "User: " << data.user << endl 
+			<< "Machine: " << data.machine << endl
+			<< "Domain: " << data.domain << endl
+			<< "IP: " << data.ip << endl 
+			<< "Activity: " << data.activity << endl;
+		outputFile.close();  
+	} 
+	else { 
+		cout << "Unable to open file for writing." << endl; 
+	}
+} 
 
 int main()
 {
@@ -77,6 +109,7 @@ int main()
 	}
 
 	char buff[1024];
+	Data data;
 
 	while (true) {										 // Listening and processing requests by the server
 		cout << endl << "Server is listening." << endl;
@@ -89,10 +122,7 @@ int main()
 			return 1;
 		}
 
-
 		// Recieving and sending message
-
-		const char* messageToSend = "Server to Client message.";
 		ZeroMemory(buff, 1024);
 
 		result = recv(ClientSocket, buff, 1024, 0); // Recieve message
@@ -115,11 +145,7 @@ int main()
 			Cleanup(ClientSocket, addrResult);
 			return 1;
 		}
-		
-
-		cout << "Recieved message: " << buff << endl;
 		//
-
 
 		result = shutdown(ClientSocket, SD_SEND); // Shut down the socket to send
 
@@ -128,7 +154,11 @@ int main()
 			Cleanup(ClientSocket, addrResult);
 			return 1;
 		}
-	}
+		
+		parseString(buff, data);
+		SaveData(data);		// Saving data in a file
+
+	}	// Stop listening
 
 	closesocket(ListenSocket);
 

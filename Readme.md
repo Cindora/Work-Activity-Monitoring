@@ -7,11 +7,11 @@
 - Client-server messaging
 - Provide work with multiple clients
 - Client: Send data to the server
+- Server: Saving client data to a file
 
 ## Features in progress (and TODOs):
 
 - Client: Collect data (domain/machine/ip/user), last activity
-- Server: Writing database, saving client data to the database
 - Server: List of all connected clients
 - Server: Screenshot request
 - Client: Screenshot (Receive screenshot request, execute screenshot, send screenshot to server)
