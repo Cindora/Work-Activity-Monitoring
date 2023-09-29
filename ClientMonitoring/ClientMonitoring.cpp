@@ -121,4 +121,7 @@ int main()
 {
 	ClientMonitoring();
 	ClientMonitoring();
+	ClientMonitoring();
+
+	cin.get();
 }

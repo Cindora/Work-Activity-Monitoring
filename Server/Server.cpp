@@ -76,67 +76,69 @@ int main()
 		return 1;
 	}
 
-	ClientSocket = accept(ListenSocket, NULL, NULL); // Connecting a client socket to the server
-
-	if (ClientSocket == INVALID_SOCKET) {
-		cout << "Accepting socket failed." << endl;
-		Cleanup(ListenSocket, addrResult);
-		return 1;
-	}
-
-	closesocket(ListenSocket);
-
-	///   Client connected to the server   ///
-
-
-	// Recieving and sending message
-
-	char buff[256];
-	ZeroMemory(buff, 256);
 
 	int counter = 0;
 
+	while (true) {										 // Listening and processing requests by the server
+		cout << endl << "Server is listening." << endl;
 
-	const char* messageToSend = "Server to Client message.";
+		ClientSocket = accept(ListenSocket, NULL, NULL); // Connecting a client socket to the server
 
-	do {
-		result = recv(ClientSocket, buff, 256, 0); // Recieving message
+		if (ClientSocket == INVALID_SOCKET) {
+			cout << "Accepting socket failed." << endl;
+			Cleanup(ListenSocket, addrResult);
+			return 1;
+		}
 
-		if (result > 0) {
-			cout << "Recieved message: " << buff << endl;
 
-			
-			std::string s = std::to_string(counter++);
-			const char * pchar = s.c_str();
+		// Recieving and sending message
 
-			result = send(ClientSocket, pchar, (int)strlen(pchar), 0); // Sending message
-			
-			if (result == SOCKET_ERROR) {
-				cout << "Message send failed. Result: " << result << endl;
+		char buff[256];
+		ZeroMemory(buff, 256);
+
+		const char* messageToSend = "Server to Client message.";
+
+		do {
+			result = recv(ClientSocket, buff, 256, 0); // Recieving message
+
+			if (result > 0) {
+				cout << "Recieved message: " << buff << endl;
+
+
+				std::string s = std::to_string(counter++);
+				const char* pchar = s.c_str();
+
+				result = send(ClientSocket, pchar, (int)strlen(pchar), 0); // Sending message
+
+				if (result == SOCKET_ERROR) {
+					cout << "Message send failed. Result: " << result << endl;
+					Cleanup(ClientSocket, addrResult);
+					return 1;
+				}
+			}
+			else if (result == 0) {
+				cout << "Connection closing." << endl;
+			}
+			else {
+				cout << "Recieving failed with error." << endl;
 				Cleanup(ClientSocket, addrResult);
 				return 1;
 			}
-		}
-		else if (result == 0) {
-			cout << "Connection closing." << endl;
-		}
-		else {
-			cout << "Recieving failed with error." << endl;
+		} while (result > 0);
+
+		//
+
+
+		result = shutdown(ClientSocket, SD_SEND); // Shut down the socket to send
+
+		if (result == SOCKET_ERROR) {
+			cout << "Shutdown client socket failed." << endl;
 			Cleanup(ClientSocket, addrResult);
 			return 1;
 		}
-	} while (result > 0);
-
-	//
-
-
-	result = shutdown(ClientSocket, SD_SEND); // Shut down the socket to send
-
-	if (result == SOCKET_ERROR) {
-		cout << "Shutdown client socket failed." << endl;
-		Cleanup(ClientSocket, addrResult);
-		return 1;
 	}
+
+	closesocket(ListenSocket);
 
 	Cleanup(ClientSocket, addrResult);
 	return 0;
