@@ -131,11 +131,4 @@ int ClientMonitoring(int id)
 int main()
 {
 	ClientMonitoring(0);
-	ClientMonitoring(1);
-	ClientMonitoring(2);
-	ClientMonitoring(3);
-	ClientMonitoring(4);
-	ClientMonitoring(5);
-
-	cin.get();
 }
