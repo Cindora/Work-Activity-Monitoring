@@ -5,13 +5,12 @@
 - Client preparation
 - Server preparation
 - Client-server messaging
+- Provide work with multiple clients
+- Client: Send data to the server
 
 ## Features in progress (and TODOs):
 
-
-- Provide work with multiple clients
 - Client: Collect data (domain/machine/ip/user), last activity
-- Client: Send data to server
 - Server: Writing database, saving client data to the database
 - Server: List of all connected clients
 - Server: Screenshot request

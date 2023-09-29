@@ -5,7 +5,6 @@
 #include <winSock2.h>
 #include <WS2tcpip.h>
 
-
 using namespace std;
 
 void Cleanup(SOCKET ConnectSocket, ADDRINFO* addrResult) {
@@ -18,6 +17,7 @@ void Cleanup(SOCKET ConnectSocket, ADDRINFO* addrResult) {
 	}
 	WSACleanup();
 }
+
 
 int ClientMonitoring()
 {
@@ -47,7 +47,7 @@ int ClientMonitoring()
 		Cleanup(ConnectSocket, addrResult);
 		return 1;
 	}
-
+	
 
 	ConnectSocket = socket(addrResult->ai_family, addrResult->ai_socktype, addrResult->ai_protocol); // Creating socket
 
@@ -68,19 +68,15 @@ int ClientMonitoring()
 
 	///   Client connected to the server   ///
 
-	// Sending message
+	const char* DataMessage = "domain machine ip user activity";
 
-	const char* messageToSend = "Client to Server message.";
-
-	result = send(ConnectSocket, messageToSend, (int)strlen(messageToSend), 0); // Sending message
+	result = send(ConnectSocket, DataMessage, (int)strlen(DataMessage), 0); // Send data to the server
 
 	if (result == SOCKET_ERROR) {
 		cout << "Message send failed. Result: " << result << endl;
 		Cleanup(ConnectSocket, addrResult);
 		return 1;
 	}
-
-	//
 
 
 	result = shutdown(ConnectSocket, SD_SEND); // Shut down the socket to send
@@ -119,8 +115,6 @@ int ClientMonitoring()
 
 int main()
 {
-	ClientMonitoring();
-	ClientMonitoring();
 	ClientMonitoring();
 
 	cin.get();
