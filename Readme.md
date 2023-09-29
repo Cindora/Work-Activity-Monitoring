@@ -1,5 +1,9 @@
 # Client-Server application for monitoring work activity
 
+The information received from the client (currently from the Information folder) is sent to the server, 
+where it is processed and written to a separate file in the Data folder. 
+Information about actual connected clients is stored in Data/ConnectedClients.data.
+
 ## Features done:
 
 - Client preparation
