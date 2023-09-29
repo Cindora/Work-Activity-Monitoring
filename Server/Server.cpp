@@ -4,9 +4,20 @@
 #include <windows.h>
 #include <winSock2.h>
 #include <WS2tcpip.h>
-
+#include <string>
 
 using namespace std;
+
+void Cleanup(SOCKET ConnectSocket, ADDRINFO* addrResult) {
+	if (ConnectSocket != INVALID_SOCKET) {
+		closesocket(ConnectSocket);
+		ConnectSocket = INVALID_SOCKET;
+	}
+	if (addrResult != NULL) {
+		freeaddrinfo(addrResult);
+	}
+	WSACleanup();
+}
 
 int main()
 {
@@ -35,7 +46,7 @@ int main()
 	result = getaddrinfo(NULL, "111", &hints, &addrResult); // Creating a path to the server
 	if (result) {
 		cout << "Path creation failed. Result: " << result << endl;
-		WSACleanup();
+		Cleanup(ListenSocket, addrResult);
 		return 1;
 	}
 
@@ -44,8 +55,7 @@ int main()
 
 	if (ListenSocket == INVALID_SOCKET) {
 		cout << "Socket creation failed." << endl;
-		freeaddrinfo(addrResult);
-		WSACleanup();
+		Cleanup(ListenSocket, addrResult);
 		return 1;
 	}
 
@@ -54,10 +64,7 @@ int main()
 
 	if (result == SOCKET_ERROR) {
 		cout << "Binding server failed." << endl;
-		closesocket(ListenSocket);
-		ListenSocket = INVALID_SOCKET;
-		freeaddrinfo(addrResult);
-		WSACleanup();
+		Cleanup(ListenSocket, addrResult);
 		return 1;
 	}
 
@@ -65,9 +72,7 @@ int main()
 
 	if (result == SOCKET_ERROR) {
 		cout << "Listening socket failed." << endl;
-		closesocket(ListenSocket);
-		freeaddrinfo(addrResult);
-		WSACleanup();
+		Cleanup(ListenSocket, addrResult);
 		return 1;
 	}
 
@@ -75,9 +80,7 @@ int main()
 
 	if (ClientSocket == INVALID_SOCKET) {
 		cout << "Accepting socket failed." << endl;
-		closesocket(ListenSocket);
-		freeaddrinfo(addrResult);
-		WSACleanup();
+		Cleanup(ListenSocket, addrResult);
 		return 1;
 	}
 
@@ -91,6 +94,9 @@ int main()
 	char buff[256];
 	ZeroMemory(buff, 256);
 
+	int counter = 0;
+
+
 	const char* messageToSend = "Server to Client message.";
 
 	do {
@@ -99,13 +105,15 @@ int main()
 		if (result > 0) {
 			cout << "Recieved message: " << buff << endl;
 
-			result = send(ClientSocket, messageToSend, (int)strlen(messageToSend), 0); // Sending message
+			
+			std::string s = std::to_string(counter++);
+			const char * pchar = s.c_str();
 
+			result = send(ClientSocket, pchar, (int)strlen(pchar), 0); // Sending message
+			
 			if (result == SOCKET_ERROR) {
 				cout << "Message send failed. Result: " << result << endl;
-				closesocket(ClientSocket);
-				freeaddrinfo(addrResult);
-				WSACleanup();
+				Cleanup(ClientSocket, addrResult);
 				return 1;
 			}
 		}
@@ -114,9 +122,7 @@ int main()
 		}
 		else {
 			cout << "Recieving failed with error." << endl;
-			closesocket(ClientSocket);
-			freeaddrinfo(addrResult);
-			WSACleanup();
+			Cleanup(ClientSocket, addrResult);
 			return 1;
 		}
 	} while (result > 0);
@@ -128,15 +134,11 @@ int main()
 
 	if (result == SOCKET_ERROR) {
 		cout << "Shutdown client socket failed." << endl;
-		closesocket(ClientSocket);
-		freeaddrinfo(addrResult);
-		WSACleanup();
+		Cleanup(ClientSocket, addrResult);
 		return 1;
 	}
 
-	closesocket(ClientSocket);
-	freeaddrinfo(addrResult);
-	WSACleanup();
+	Cleanup(ClientSocket, addrResult);
 	return 0;
 
 }

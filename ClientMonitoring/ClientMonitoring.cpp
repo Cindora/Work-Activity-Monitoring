@@ -13,12 +13,9 @@ void Cleanup(SOCKET ConnectSocket, ADDRINFO* addrResult) {
 		closesocket(ConnectSocket);
 		ConnectSocket = INVALID_SOCKET;
 	}
-		
-
 	if (addrResult != NULL) {
 		freeaddrinfo(addrResult);
 	}
-		
 	WSACleanup();
 }
 
