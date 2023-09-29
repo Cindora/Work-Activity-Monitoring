@@ -7,9 +7,10 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-
+#include <filesystem>
 
 using namespace std;
+namespace fs = filesystem;
 
 struct Data {
 	string domain;
@@ -39,17 +40,44 @@ void SaveData(const Data& data) {	// Saving data to a file (Data/"user".data)
 	CreateDirectory("Data", NULL);
 	ofstream outputFile("Data/" + data.user + ".data");
 	if (outputFile.is_open()) { 
-		outputFile << "User: " << data.user << endl 
-			<< "Machine: " << data.machine << endl
-			<< "Domain: " << data.domain << endl
-			<< "IP: " << data.ip << endl 
-			<< "Activity: " << data.activity << endl;
+		outputFile << data.user << " " << data.machine << " " << 
+			data.domain << " " << data.ip << " " << data.activity << endl;
 		outputFile.close();  
 	} 
 	else { 
 		cout << "Unable to open file for writing." << endl; 
 	}
 } 
+
+void ReadAndWriteData(const string& username, ofstream& outputFile) {	// Helper function for UpdateConnectedClients
+	ifstream clientInfo(username);
+	if (clientInfo.is_open()) {
+		string dataStr;
+		if (getline(clientInfo, dataStr)) {
+			outputFile << dataStr << endl;
+		}
+		clientInfo.close();
+	}
+	else {
+		cout << "Unable to open file " << username << endl;
+	}
+}
+
+void UpdateConnectedClients(const string& dataFolder, const string& outputFilename) {	// Read client information and write it to СonnectedСlients 
+	ofstream outputFile(dataFolder + "/" + outputFilename);
+	if (!outputFile.is_open()) {
+		cout << "Unable to open output file." << endl;
+		return;
+	}
+
+	for (const auto& entry : fs::directory_iterator(dataFolder)) {
+		if (entry.is_regular_file()) {
+			ReadAndWriteData(entry.path().string(), outputFile);
+		}
+	}
+
+	outputFile.close();
+}
 
 int main()
 {
@@ -127,16 +155,7 @@ int main()
 
 		result = recv(ClientSocket, buff, 1024, 0); // Recieve message
 
-		if (result > 0) {
-
-			//result = send(ClientSocket, pchar, (int)strlen(pchar), 0); // Sending message
-
-			//if (result == SOCKET_ERROR) {
-			//	cout << "Message send failed. Result: " << result << endl;
-			//	Cleanup(ClientSocket, addrResult);
-			//	return 1;
-			//}
-		}
+		if (result > 0) {}
 		else if (result == 0) {
 			cout << "Connection closing." << endl;
 		}
@@ -158,6 +177,7 @@ int main()
 		parseString(buff, data);
 		SaveData(data);		// Saving data in a file
 
+		UpdateConnectedClients("Data", "ConnectedClients.data");	// Update information about connected clients
 	}	// Stop listening
 
 	closesocket(ListenSocket);

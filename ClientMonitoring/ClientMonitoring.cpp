@@ -4,6 +4,8 @@
 #include <windows.h>
 #include <winSock2.h>
 #include <WS2tcpip.h>
+#include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -18,8 +20,9 @@ void Cleanup(SOCKET ConnectSocket, ADDRINFO* addrResult) {
 	WSACleanup();
 }
 
+string Infos[] = {"user1", "user2", "user3", "user4", "user1(2)" , "user3(4)"};	// File names for tests
 
-int ClientMonitoring()
+int ClientMonitoring(int id)
 {
 	WSADATA wsaData;
 	ADDRINFO hints;
@@ -68,9 +71,23 @@ int ClientMonitoring()
 
 	///   Client connected to the server   ///
 
-	const char* DataMessage = "user machine domain ip activity";
 
-	result = send(ConnectSocket, DataMessage, (int)strlen(DataMessage), 0); // Send data to the server
+	// Read client information from the file
+	string line;
+
+	ifstream in("Information/" + Infos[id] + ".data");
+	if (in.is_open()) {
+		getline(in, line);
+	}
+	else {
+		cout << "Info readind failed." << endl;
+		Cleanup(ConnectSocket, addrResult);
+		return 1;
+	}
+	in.close();
+	//
+
+	result = send(ConnectSocket, line.c_str(), (int)strlen(line.c_str()), 0); // Send data to the server
 
 	if (result == SOCKET_ERROR) {
 		cout << "Message send failed. Result: " << result << endl;
@@ -88,7 +105,6 @@ int ClientMonitoring()
 
 
 	// Recieving message
-
 	char buff[256];
 	ZeroMemory(buff, 256);
 
@@ -105,7 +121,6 @@ int ClientMonitoring()
 			cout << "Recieving failed with error." << endl;
 		}
 	} while (result > 0);
-
 	//
 
 
@@ -115,8 +130,12 @@ int ClientMonitoring()
 
 int main()
 {
-	ClientMonitoring();
-	ClientMonitoring();
+	ClientMonitoring(0);
+	ClientMonitoring(1);
+	ClientMonitoring(2);
+	ClientMonitoring(3);
+	ClientMonitoring(4);
+	ClientMonitoring(5);
 
 	cin.get();
 }
